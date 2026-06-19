@@ -1,0 +1,298 @@
+{
+  "fixed_seed": 19,
+  "rollouts": 24,
+  "baseline_success_rate": 0.16666666666666666,
+  "residual_success_rate": 1.0,
+  "median_baseline_error_m": 0.027124,
+  "median_residual_error_m": 0.000279,
+  "trials": [
+    {
+      "seed": 0,
+      "disturbance_xyz_m": [
+        -0.00925,
+        0.01789,
+        0.00499
+      ],
+      "baseline_error_m": 0.020752,
+      "residual_error_m": 0.000213,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 1,
+      "disturbance_xyz_m": [
+        -0.01545,
+        0.0121,
+        -0.0174
+      ],
+      "baseline_error_m": 0.026229,
+      "residual_error_m": 0.00027,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 2,
+      "disturbance_xyz_m": [
+        0.01484,
+        -0.01011,
+        0.00758
+      ],
+      "baseline_error_m": 0.019489,
+      "residual_error_m": 0.0002,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 3,
+      "disturbance_xyz_m": [
+        0.01098,
+        -0.01381,
+        0.00634
+      ],
+      "baseline_error_m": 0.018746,
+      "residual_error_m": 0.000193,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 4,
+      "disturbance_xyz_m": [
+        0.00855,
+        -0.01163,
+        0.02401
+      ],
+      "baseline_error_m": 0.028018,
+      "residual_error_m": 0.000288,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 5,
+      "disturbance_xyz_m": [
+        0.02005,
+        -0.02128,
+        -0.01186
+      ],
+      "baseline_error_m": 0.031547,
+      "residual_error_m": 0.000324,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 6,
+      "disturbance_xyz_m": [
+        0.00792,
+        0.00562,
+        -0.00872
+      ],
+      "baseline_error_m": 0.013052,
+      "residual_error_m": 0.000134,
+      "baseline_success": true,
+      "residual_success": true
+    },
+    {
+      "seed": 7,
+      "disturbance_xyz_m": [
+        0.0304,
+        0.00175,
+        -0.01035
+      ],
+      "baseline_error_m": 0.032159,
+      "residual_error_m": 0.000379,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 8,
+      "disturbance_xyz_m": [
+        -0.00936,
+        -0.00322,
+        -0.01864
+      ],
+      "baseline_error_m": 0.021107,
+      "residual_error_m": 0.000217,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 9,
+      "disturbance_xyz_m": [
+        -0.02081,
+        -0.03258,
+        -0.00352
+      ],
+      "baseline_error_m": 0.038815,
+      "residual_error_m": 0.000461,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 10,
+      "disturbance_xyz_m": [
+        0.01532,
+        -0.02315,
+        0.00387
+      ],
+      "baseline_error_m": 0.028022,
+      "residual_error_m": 0.000288,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 11,
+      "disturbance_xyz_m": [
+        -0.02957,
+        -0.00295,
+        -0.00619
+      ],
+      "baseline_error_m": 0.030352,
+      "residual_error_m": 0.000354,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 12,
+      "disturbance_xyz_m": [
+        -0.0303,
+        -0.00988,
+        -0.01471
+      ],
+      "baseline_error_m": 0.035104,
+      "residual_error_m": 0.000405,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 13,
+      "disturbance_xyz_m": [
+        0.00734,
+        0.00083,
+        0.0144
+      ],
+      "baseline_error_m": 0.016183,
+      "residual_error_m": 0.000166,
+      "baseline_success": true,
+      "residual_success": true
+    },
+    {
+      "seed": 14,
+      "disturbance_xyz_m": [
+        -0.03658,
+        0.01967,
+        -0.00095
+      ],
+      "baseline_error_m": 0.041545,
+      "residual_error_m": 0.000526,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 15,
+      "disturbance_xyz_m": [
+        0.01013,
+        -0.00339,
+        0.01856
+      ],
+      "baseline_error_m": 0.02142,
+      "residual_error_m": 0.00022,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 16,
+      "disturbance_xyz_m": [
+        0.03465,
+        0.01923,
+        0.00311
+      ],
+      "baseline_error_m": 0.039752,
+      "residual_error_m": 0.000491,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 17,
+      "disturbance_xyz_m": [
+        -0.05845,
+        0.01001,
+        -0.00039
+      ],
+      "baseline_error_m": 0.059298,
+      "residual_error_m": 0.001644,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 18,
+      "disturbance_xyz_m": [
+        -0.00335,
+        0.00782,
+        0.01432
+      ],
+      "baseline_error_m": 0.016659,
+      "residual_error_m": 0.000171,
+      "baseline_success": true,
+      "residual_success": true
+    },
+    {
+      "seed": 19,
+      "disturbance_xyz_m": [
+        0.00668,
+        -0.0084,
+        -0.00933
+      ],
+      "baseline_error_m": 0.014221,
+      "residual_error_m": 0.000146,
+      "baseline_success": true,
+      "residual_success": true
+    },
+    {
+      "seed": 20,
+      "disturbance_xyz_m": [
+        0.00925,
+        0.01977,
+        0.00658
+      ],
+      "baseline_error_m": 0.0228,
+      "residual_error_m": 0.000234,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 21,
+      "disturbance_xyz_m": [
+        0.01145,
+        -0.00812,
+        -0.01483
+      ],
+      "baseline_error_m": 0.020417,
+      "residual_error_m": 0.00021,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 22,
+      "disturbance_xyz_m": [
+        0.02365,
+        0.01091,
+        -0.02193
+      ],
+      "baseline_error_m": 0.034051,
+      "residual_error_m": 0.00035,
+      "baseline_success": false,
+      "residual_success": true
+    },
+    {
+      "seed": 23,
+      "disturbance_xyz_m": [
+        -0.01793,
+        0.01802,
+        0.01281
+      ],
+      "baseline_error_m": 0.02847,
+      "residual_error_m": 0.000293,
+      "baseline_success": false,
+      "residual_success": true
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "entrypoint": "run.py",
+  "model": "scene.xml",
+  "configuration": "config.json",
+  "validator": "validate.py",
+  "generated_outputs": [
+    "artifacts/demo.mp4",
+    "artifacts/trajectory.json",
+    "artifacts/report.json",
+    "artifacts/evaluation.json",
+    "artifacts/policy_card.json"
+  ],
+  "deterministic_seed": 19
+}

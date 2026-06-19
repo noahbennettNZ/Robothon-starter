@@ -1,0 +1,35 @@
+{
+  "project": "Tactile Fuse Relay",
+  "success": true,
+  "task_completion": 1.0,
+  "duration_s": 60.0,
+  "simulation_steps": 14999,
+  "actuated_dof": 15,
+  "finger_count": 5,
+  "sensor_channels": 23,
+  "collision_pairs_observed": 8,
+  "insertion_error_m": 0.007527,
+  "final_replacement_xyz": [
+    0.218087,
+    0.04272,
+    0.071984
+  ],
+  "socket_xyz": [
+    0.22,
+    0.05,
+    0.075
+  ],
+  "latch_depth_m": 0.025354,
+  "maximum_engaged_fingers": 5,
+  "slip_peak_error_m": 0.016844,
+  "post_recovery_error_m": 4.1e-05,
+  "feedback_corrections": 4464,
+  "median_visual_servo_error_m": 0.022212,
+  "outputs": [
+    "demo.mp4",
+    "trajectory.json",
+    "report.json",
+    "evaluation.json",
+    "policy_card.json"
+  ]
+}
