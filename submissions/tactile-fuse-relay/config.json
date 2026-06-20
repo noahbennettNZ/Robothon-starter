@@ -2,7 +2,7 @@
   "seed": 19,
   "control_hz": 50,
   "simulation_hz": 250,
-  "video_fps": 20,
+  "video_fps": 25,
   "stages": [
     {"name": "INSPECT", "seconds": 4.0},
     {"name": "EXTRACT FAILED FUSE", "seconds": 8.0},

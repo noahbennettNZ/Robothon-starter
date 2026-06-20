@@ -15,5 +15,6 @@
     "safety latch"
   ],
   "recovery": "Measured object pose error produces bounded XYZ residual action after a seeded slip.",
-  "grasp_model": "Contact-rich finger closure followed by a high-friction weld constraint for reproducible transport."
+  "tactile_control": "Each finger unloads independently above a 12 N target; attachment requires the configured minimum measured contacts.",
+  "grasp_model": "A weld activates only after a measured multi-finger grasp and is released before gravity-driven placement."
 }

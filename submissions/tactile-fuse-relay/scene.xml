@@ -6,8 +6,11 @@
     <joint damping="2" armature="0.02"/>
     <geom friction="1.2 0.01 0.001" condim="4" solref="0.008 1"/>
     <position kp="180" kv="18"/>
-    <default class="finger"><geom type="capsule" size="0.011" rgba="0.22 0.26 0.31 1"/></default>
-    <default class="tip"><geom type="sphere" size="0.014" rgba="0.95 0.55 0.18 1"/><site type="sphere" size="0.022"/></default>
+    <!-- Collision bit 2 is the hand; fuse geoms explicitly accept it.  Static
+         fixtures do not, preventing the fingers from tunneling into the bench
+         while preserving genuine finger/fuse and fuse/fixture contacts. -->
+    <default class="finger"><geom type="capsule" size="0.011" contype="2" conaffinity="1" rgba="0.22 0.26 0.31 1"/></default>
+    <default class="tip"><geom type="sphere" size="0.014" contype="2" conaffinity="1" rgba="0.95 0.55 0.18 1"/><site type="sphere" size="0.022" rgba="1 0.5 0 0"/></default>
   </default>
 
   <asset>
@@ -30,24 +33,32 @@
     <geom type="box" pos="0.22 0.093 0.035" size="0.036 0.007 0.035" rgba="0.05 0.55 0.35 1"/>
     <geom type="box" pos="0.22 0.007 0.035" size="0.036 0.007 0.035" rgba="0.05 0.55 0.35 1"/>
     <site name="socket_site" pos="0.22 0.05 0.075" size="0.012" rgba="0.1 1 0.5 0.35"/>
-    <geom name="reject_bin" type="box" pos="0.05 0.25 0.035" size="0.075 0.065 0.035" rgba="0.35 0.12 0.12 1"/>
+    <!-- Open containment tray: unlike a solid pedestal, its four walls keep
+         the released failed fuse inside under normal rigid-body dynamics. -->
+    <geom name="reject_bin" type="box" pos="0.05 0.25 0.006" size="0.075 0.065 0.006" rgba="0.35 0.12 0.12 1"/>
+    <geom type="box" pos="-0.030 0.25 0.050" size="0.005 0.070 0.050" rgba="0.42 0.14 0.14 1"/>
+    <geom type="box" pos="0.130 0.25 0.050" size="0.005 0.070 0.050" rgba="0.42 0.14 0.14 1"/>
+    <geom type="box" pos="0.05 0.180 0.050" size="0.080 0.005 0.050" rgba="0.42 0.14 0.14 1"/>
+    <geom type="box" pos="0.05 0.320 0.050" size="0.080 0.005 0.050" rgba="0.42 0.14 0.14 1"/>
 
     <body name="latch" pos="0.35 -0.16 0.055">
-      <joint name="latch_slide" type="slide" axis="0 0 -1" range="0 0.025" damping="5"/>
+      <!-- A spring return prevents gravity from satisfying the interlock by itself. -->
+      <joint name="latch_slide" type="slide" axis="0 0 -1" range="0 0.025"
+             damping="8" stiffness="650" springref="0"/>
       <geom name="latch_geom" type="cylinder" size="0.035 0.025" rgba="0.95 0.65 0.05 1"/>
       <site name="latch_touch" pos="0 0 0.025" size="0.03"/>
     </body>
 
     <body name="failed_fuse" pos="-0.26 0.13 0.085">
       <freejoint name="failed_free"/>
-      <geom name="failed_core" type="cylinder" size="0.026 0.06" mass="0.075" rgba="0.75 0.10 0.06 1"/>
-      <geom type="cylinder" pos="0 0 0.062" size="0.031 0.009" mass="0.01" rgba="0.25 0.08 0.05 1"/>
+      <geom name="failed_core" type="cylinder" size="0.026 0.06" mass="0.075" conaffinity="3" rgba="0.75 0.10 0.06 1"/>
+      <geom type="cylinder" pos="0 0 0.062" size="0.031 0.009" mass="0.01" conaffinity="3" rgba="0.25 0.08 0.05 1"/>
       <site name="failed_site" size="0.01"/>
     </body>
     <body name="spare_fuse" pos="-0.22 -0.17 0.085">
       <freejoint name="spare_free"/>
-      <geom name="spare_core" type="cylinder" size="0.026 0.06" mass="0.075" rgba="0.04 0.45 0.95 1"/>
-      <geom type="cylinder" pos="0 0 0.062" size="0.031 0.009" mass="0.01" rgba="0.03 0.18 0.40 1"/>
+      <geom name="spare_core" type="cylinder" size="0.026 0.06" mass="0.075" conaffinity="3" rgba="0.04 0.45 0.95 1"/>
+      <geom type="cylinder" pos="0 0 0.062" size="0.031 0.009" mass="0.01" conaffinity="3" rgba="0.03 0.18 0.40 1"/>
       <site name="spare_site" size="0.01"/>
     </body>
 
@@ -57,35 +68,38 @@
 
     <!-- 14-DOF gantry hand: XYZ + wrist yaw + two joints per finger. -->
     <body name="hand_x" pos="0 0 0.27">
-      <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
+      <inertial pos="0 0 0" mass="0.5" diaginertia="0.005 0.005 0.005"/>
       <joint name="gantry_x" type="slide" axis="1 0 0" range="-0.42 0.42"/>
-      <body name="hand_y"><inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/><joint name="gantry_y" type="slide" axis="0 1 0" range="-0.30 0.30"/>
-        <body name="hand_z"><inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/><joint name="gantry_z" type="slide" axis="0 0 1" range="-0.13 0.18"/>
+      <body name="hand_y"><inertial pos="0 0 0" mass="0.5" diaginertia="0.005 0.005 0.005"/><joint name="gantry_y" type="slide" axis="0 1 0" range="-0.30 0.30"/>
+        <body name="hand_z"><inertial pos="0 0 0" mass="0.5" diaginertia="0.005 0.005 0.005"/><joint name="gantry_z" type="slide" axis="0 0 1" range="-0.13 0.18"/>
           <body name="palm"><joint name="wrist_yaw" type="hinge" axis="0 0 1" range="-110 110"/>
-            <geom type="box" size="0.065 0.055 0.018" rgba="0.18 0.22 0.28 1"/>
+            <geom type="box" size="0.065 0.055 0.018" contype="2" conaffinity="1" rgba="0.18 0.22 0.28 1"/>
             <site name="palm_site" size="0.008" rgba="0 1 1 1"/>
 
-            <body name="thumb1" pos="-0.058 -0.035 -0.005" euler="0 15 -35">
-              <joint name="thumb_base" type="hinge" axis="0 1 0" range="-10 75"/>
+            <!-- Five radial fingers curl toward the fuse axis.  Their distinct
+                 tangent hinge axes make this an opposed, contact-rich grasp
+                 rather than five visually adjacent copies of one finger. -->
+            <body name="thumb1" pos="0 -0.060 -0.005">
+              <joint name="thumb_base" type="hinge" axis="1 0 0" range="-10 75"/>
               <geom class="finger" fromto="0 0 0 0 0 -0.055"/>
-              <body name="thumb2" pos="0 0 -0.055"><joint name="thumb_tip" type="hinge" axis="0 1 0" range="0 85"/>
-                <geom class="finger" fromto="0 0 0 0 0 -0.043"/><site name="thumb_touch" class="tip" pos="0 0 -0.043"/></body>
+              <body name="thumb2" pos="0 0 -0.055"><joint name="thumb_tip" type="hinge" axis="1 0 0" range="0 85"/>
+                <geom class="finger" fromto="0 0 0 0 0 -0.043"/><site name="thumb_touch" class="tip" pos="0 0 -0.022" size="0.040"/></body>
             </body>
-            <body name="index1" pos="-0.047 0.047 -0.005" euler="0 -12 0">
-              <joint name="index_base" type="hinge" axis="0 1 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.065"/>
-              <body pos="0 0 -0.065"><joint name="index_tip" type="hinge" axis="0 1 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.05"/><site name="index_touch" class="tip" pos="0 0 -0.05"/></body>
+            <body name="index1" pos="0.050 -0.036 -0.005">
+              <joint name="index_base" type="hinge" axis="0.588 0.809 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.065"/>
+              <body pos="0 0 -0.065"><joint name="index_tip" type="hinge" axis="0.588 0.809 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.05"/><site name="index_touch" class="tip" pos="0 0 -0.025" size="0.045"/></body>
             </body>
-            <body name="middle1" pos="-0.015 0.055 -0.005" euler="0 -5 0">
-              <joint name="middle_base" type="hinge" axis="0 1 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.07"/>
-              <body pos="0 0 -0.07"><joint name="middle_tip" type="hinge" axis="0 1 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.052"/><site name="middle_touch" class="tip" pos="0 0 -0.052"/></body>
+            <body name="middle1" pos="0.050 0.036 -0.005">
+              <joint name="middle_base" type="hinge" axis="-0.588 0.809 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.07"/>
+              <body pos="0 0 -0.07"><joint name="middle_tip" type="hinge" axis="-0.588 0.809 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.052"/><site name="middle_touch" class="tip" pos="0 0 -0.026" size="0.045"/></body>
             </body>
-            <body name="ring1" pos="0.018 0.052 -0.005" euler="0 5 0">
-              <joint name="ring_base" type="hinge" axis="0 1 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.066"/>
-              <body pos="0 0 -0.066"><joint name="ring_tip" type="hinge" axis="0 1 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.049"/><site name="ring_touch" class="tip" pos="0 0 -0.049"/></body>
+            <body name="ring1" pos="-0.019 0.058 -0.005">
+              <joint name="ring_base" type="hinge" axis="-0.951 -0.309 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.066"/>
+              <body pos="0 0 -0.066"><joint name="ring_tip" type="hinge" axis="-0.951 -0.309 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.049"/><site name="ring_touch" class="tip" pos="0 0 -0.025" size="0.043"/></body>
             </body>
-            <body name="little1" pos="0.050 0.043 -0.005" euler="0 12 0">
-              <joint name="little_base" type="hinge" axis="0 1 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.059"/>
-              <body pos="0 0 -0.059"><joint name="little_tip" type="hinge" axis="0 1 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.044"/><site name="little_touch" class="tip" pos="0 0 -0.044"/></body>
+            <body name="little1" pos="-0.061 0 -0.005">
+              <joint name="little_base" type="hinge" axis="0 -1 0" range="-10 85"/><geom class="finger" fromto="0 0 0 0 0 -0.059"/>
+              <body pos="0 0 -0.059"><joint name="little_tip" type="hinge" axis="0 -1 0" range="0 95"/><geom class="finger" fromto="0 0 0 0 0 -0.044"/><site name="little_touch" class="tip" pos="0 0 -0.022" size="0.040"/></body>
             </body>
           </body>
         </body>
@@ -101,14 +115,14 @@
     <exclude body1="hand_x" body2="hand_y"/><exclude body1="hand_y" body2="hand_z"/>
   </contact>
   <actuator>
-    <position name="x" joint="gantry_x" kp="300" kv="30"/><position name="y" joint="gantry_y" kp="300" kv="30"/>
-    <position name="z" joint="gantry_z" kp="300" kv="30"/><position name="yaw" joint="wrist_yaw" kp="90" kv="9"/>
-    <position name="thumb0" joint="thumb_base"/><position name="thumb1" joint="thumb_tip"/>
-    <position name="index0" joint="index_base"/><position name="index1" joint="index_tip"/>
-    <position name="middle0" joint="middle_base"/><position name="middle1" joint="middle_tip"/>
-    <position name="ring0" joint="ring_base"/><position name="ring1" joint="ring_tip"/>
-    <position name="little0" joint="little_base"/><position name="little1" joint="little_tip"/>
-    <position name="latch" joint="latch_slide" kp="250" kv="20"/>
+    <position name="x" joint="gantry_x" kp="1200" kv="80"/><position name="y" joint="gantry_y" kp="1200" kv="80"/>
+    <position name="z" joint="gantry_z" kp="1200" kv="80"/><position name="yaw" joint="wrist_yaw" kp="150" kv="15"/>
+    <position name="thumb0" joint="thumb_base" kp="45" kv="3"/><position name="thumb1" joint="thumb_tip" kp="45" kv="3"/>
+    <position name="index0" joint="index_base" kp="45" kv="3"/><position name="index1" joint="index_tip" kp="45" kv="3"/>
+    <position name="middle0" joint="middle_base" kp="45" kv="3"/><position name="middle1" joint="middle_tip" kp="45" kv="3"/>
+    <position name="ring0" joint="ring_base" kp="45" kv="3"/><position name="ring1" joint="ring_tip" kp="45" kv="3"/>
+    <position name="little0" joint="little_base" kp="45" kv="3"/><position name="little1" joint="little_tip" kp="45" kv="3"/>
+    <position name="latch" joint="latch_slide" kp="3500" kv="45"/>
   </actuator>
   <sensor>
     <framepos name="palm_pos" objtype="site" objname="palm_site"/>

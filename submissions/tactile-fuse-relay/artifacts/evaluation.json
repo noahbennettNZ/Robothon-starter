@@ -1,10 +1,14 @@
 {
+  "method": "paired MuJoCo physics rollouts with identical initial disturbances",
+  "simulation_hz": 250,
+  "control_hz": 50,
+  "success_threshold_m": 0.018,
   "fixed_seed": 19,
   "rollouts": 24,
-  "baseline_success_rate": 0.16666666666666666,
+  "baseline_success_rate": 0.2916666666666667,
   "residual_success_rate": 1.0,
-  "median_baseline_error_m": 0.027124,
-  "median_residual_error_m": 0.000279,
+  "median_baseline_error_m": 0.020568,
+  "median_residual_error_m": 0.000441,
   "trials": [
     {
       "seed": 0,
@@ -13,8 +17,8 @@
         0.01789,
         0.00499
       ],
-      "baseline_error_m": 0.020752,
-      "residual_error_m": 0.000213,
+      "baseline_error_m": 0.01825632,
+      "residual_error_m": 0.00028254,
       "baseline_success": false,
       "residual_success": true
     },
@@ -25,8 +29,8 @@
         0.0121,
         -0.0174
       ],
-      "baseline_error_m": 0.026229,
-      "residual_error_m": 0.00027,
+      "baseline_error_m": 0.01837101,
+      "residual_error_m": 0.00163493,
       "baseline_success": false,
       "residual_success": true
     },
@@ -37,8 +41,8 @@
         -0.01011,
         0.00758
       ],
-      "baseline_error_m": 0.019489,
-      "residual_error_m": 0.0002,
+      "baseline_error_m": 0.01826391,
+      "residual_error_m": 0.00025541,
       "baseline_success": false,
       "residual_success": true
     },
@@ -49,9 +53,9 @@
         -0.01381,
         0.00634
       ],
-      "baseline_error_m": 0.018746,
-      "residual_error_m": 0.000193,
-      "baseline_success": false,
+      "baseline_error_m": 0.01759778,
+      "residual_error_m": 0.00024464,
+      "baseline_success": true,
       "residual_success": true
     },
     {
@@ -61,8 +65,8 @@
         -0.01163,
         0.02401
       ],
-      "baseline_error_m": 0.028018,
-      "residual_error_m": 0.000288,
+      "baseline_error_m": 0.02789067,
+      "residual_error_m": 0.0003598,
       "baseline_success": false,
       "residual_success": true
     },
@@ -73,8 +77,8 @@
         -0.02128,
         -0.01186
       ],
-      "baseline_error_m": 0.031547,
-      "residual_error_m": 0.000324,
+      "baseline_error_m": 0.02253747,
+      "residual_error_m": 0.00107141,
       "baseline_success": false,
       "residual_success": true
     },
@@ -85,8 +89,8 @@
         0.00562,
         -0.00872
       ],
-      "baseline_error_m": 0.013052,
-      "residual_error_m": 0.000134,
+      "baseline_error_m": 0.0109739,
+      "residual_error_m": 0.00031361,
       "baseline_success": true,
       "residual_success": true
     },
@@ -97,8 +101,8 @@
         0.00175,
         -0.01035
       ],
-      "baseline_error_m": 0.032159,
-      "residual_error_m": 0.000379,
+      "baseline_error_m": 0.02048264,
+      "residual_error_m": 0.00051814,
       "baseline_success": false,
       "residual_success": true
     },
@@ -109,9 +113,9 @@
         -0.00322,
         -0.01864
       ],
-      "baseline_error_m": 0.021107,
-      "residual_error_m": 0.000217,
-      "baseline_success": false,
+      "baseline_error_m": 0.01303292,
+      "residual_error_m": 0.00126236,
+      "baseline_success": true,
       "residual_success": true
     },
     {
@@ -121,8 +125,8 @@
         -0.03258,
         -0.00352
       ],
-      "baseline_error_m": 0.038815,
-      "residual_error_m": 0.000461,
+      "baseline_error_m": 0.02740376,
+      "residual_error_m": 0.0006429,
       "baseline_success": false,
       "residual_success": true
     },
@@ -133,8 +137,8 @@
         -0.02315,
         0.00387
       ],
-      "baseline_error_m": 0.028022,
-      "residual_error_m": 0.000288,
+      "baseline_error_m": 0.02281145,
+      "residual_error_m": 0.0004032,
       "baseline_success": false,
       "residual_success": true
     },
@@ -145,8 +149,8 @@
         -0.00295,
         -0.00619
       ],
-      "baseline_error_m": 0.030352,
-      "residual_error_m": 0.000354,
+      "baseline_error_m": 0.02065335,
+      "residual_error_m": 0.00047916,
       "baseline_success": false,
       "residual_success": true
     },
@@ -157,8 +161,8 @@
         -0.00988,
         -0.01471
       ],
-      "baseline_error_m": 0.035104,
-      "residual_error_m": 0.000405,
+      "baseline_error_m": 0.02544116,
+      "residual_error_m": 0.00115466,
       "baseline_success": false,
       "residual_success": true
     },
@@ -169,8 +173,8 @@
         0.00083,
         0.0144
       ],
-      "baseline_error_m": 0.016183,
-      "residual_error_m": 0.000166,
+      "baseline_error_m": 0.01612089,
+      "residual_error_m": 0.00020633,
       "baseline_success": true,
       "residual_success": true
     },
@@ -181,8 +185,8 @@
         0.01967,
         -0.00095
       ],
-      "baseline_error_m": 0.041545,
-      "residual_error_m": 0.000526,
+      "baseline_error_m": 0.02939809,
+      "residual_error_m": 0.00073217,
       "baseline_success": false,
       "residual_success": true
     },
@@ -193,8 +197,8 @@
         -0.00339,
         0.01856
       ],
-      "baseline_error_m": 0.02142,
-      "residual_error_m": 0.00022,
+      "baseline_error_m": 0.02138316,
+      "residual_error_m": 0.00027438,
       "baseline_success": false,
       "residual_success": true
     },
@@ -205,8 +209,8 @@
         0.01923,
         0.00311
       ],
-      "baseline_error_m": 0.039752,
-      "residual_error_m": 0.000491,
+      "baseline_error_m": 0.03108666,
+      "residual_error_m": 0.00066674,
       "baseline_success": false,
       "residual_success": true
     },
@@ -217,8 +221,8 @@
         0.01001,
         -0.00039
       ],
-      "baseline_error_m": 0.059298,
-      "residual_error_m": 0.001644,
+      "baseline_error_m": 0.06695086,
+      "residual_error_m": 0.0048128,
       "baseline_success": false,
       "residual_success": true
     },
@@ -229,8 +233,8 @@
         0.00782,
         0.01432
       ],
-      "baseline_error_m": 0.016659,
-      "residual_error_m": 0.000171,
+      "baseline_error_m": 0.01659883,
+      "residual_error_m": 0.00021267,
       "baseline_success": true,
       "residual_success": true
     },
@@ -241,8 +245,8 @@
         -0.0084,
         -0.00933
       ],
-      "baseline_error_m": 0.014221,
-      "residual_error_m": 0.000146,
+      "baseline_error_m": 0.0120071,
+      "residual_error_m": 0.00039417,
       "baseline_success": true,
       "residual_success": true
     },
@@ -253,8 +257,8 @@
         0.01977,
         0.00658
       ],
-      "baseline_error_m": 0.0228,
-      "residual_error_m": 0.000234,
+      "baseline_error_m": 0.01985808,
+      "residual_error_m": 0.00031691,
       "baseline_success": false,
       "residual_success": true
     },
@@ -265,9 +269,9 @@
         -0.00812,
         -0.01483
       ],
-      "baseline_error_m": 0.020417,
-      "residual_error_m": 0.00021,
-      "baseline_success": false,
+      "baseline_error_m": 0.01580736,
+      "residual_error_m": 0.00096853,
+      "baseline_success": true,
       "residual_success": true
     },
     {
@@ -277,8 +281,8 @@
         0.01091,
         -0.02193
       ],
-      "baseline_error_m": 0.034051,
-      "residual_error_m": 0.00035,
+      "baseline_error_m": 0.02259914,
+      "residual_error_m": 0.00222887,
       "baseline_success": false,
       "residual_success": true
     },
@@ -289,8 +293,8 @@
         0.01802,
         0.01281
       ],
-      "baseline_error_m": 0.02847,
-      "residual_error_m": 0.000293,
+      "baseline_error_m": 0.02612021,
+      "residual_error_m": 0.00037955,
       "baseline_success": false,
       "residual_success": true
     }

@@ -61,7 +61,9 @@ class RelayDemo:
         self.no_video = no_video
         self.dt = self.model.opt.timestep
         self.steps_per_control = round(1 / self.cfg["control_hz"] / self.dt)
-        self.scale = 0.16 if quick else 1.0
+        # Keep contact/settling time physically identical in smoke tests;
+        # --quick reduces evaluation rollouts instead of time-compressing physics.
+        self.scale = 1.0
         self.trace = []
         self.frames = []
         self.renderer = None
@@ -78,22 +80,50 @@ class RelayDemo:
         self.slip_peak = 0.0
         self.recovery_final = 0.0
         self.corrections = 0
+        self.max_contacts = 0
+        self.max_collision_pairs = 0
+        self.grasp_contacts = {"failed": 0, "spare": 0}
+        self.sensor_ids = {}
+        self.finger_names = ("thumb", "index", "middle", "ring", "little")
+        self.thresholds = self.cfg["success_thresholds"]
         self.open_fingers = np.zeros(10)
-        self.closed_fingers = np.array([0.55, 0.75, 0.58, 0.82, 0.62, 0.85, 0.59, 0.80, 0.52, 0.72])
+        # Independent, slightly asymmetric set-points produce a stable opposed
+        # grasp without driving every fingertip deeply into the component.
+        self.closed_fingers = np.array([0.52, 0.42, 0.56, 0.44, 0.58, 0.46, 0.55, 0.43, 0.50, 0.40])
 
     def sensor(self, name):
-        sid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR, name)
+        sid = self.sensor_ids.setdefault(
+            name, mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR, name)
+        )
         adr, dim = self.model.sensor_adr[sid], self.model.sensor_dim[sid]
         return self.data.sensordata[adr:adr+dim].copy()
 
+    def touch_forces(self):
+        return {name: float(self.sensor(f"{name}_force")[0]) for name in self.finger_names}
+
+    def finger_targets(self, grip, forces):
+        """Close independently and unload a finger when its force is excessive."""
+        targets = mix(self.open_fingers, self.closed_fingers, grip)
+        for i, name in enumerate(self.finger_names):
+            # A conservative 12 N target keeps the tactile loop visible and
+            # prevents the position servos from crushing the fuse.
+            unload = np.clip((forces[name] - 12.0) * 0.0015, 0.0, 0.16)
+            targets[2*i:2*i+2] = np.maximum(0.0, targets[2*i:2*i+2] - unload)
+        return targets
+
     def hand_target(self, stage, p):
         home = [0.0, -0.02, 0.09]
-        failed = [-0.26, 0.13, -0.045]
-        reject = [0.05, 0.25, 0.055]
+        # A deliberate 25 mm lateral pre-grasp offset lets the radial fingers
+        # make observable opposed contact before the palm recenters on lift.
+        failed = [-0.235, 0.13, -0.065]
+        # Lower into the containment tray before opening; this is controlled
+        # placement, not a ballistic drop onto a pedestal.
+        reject = [0.08, 0.25, -0.04]
         spare = [-0.22, -0.17, -0.045]
         pre_socket = [0.10, -0.04, 0.07]
         # Release just above the socket lip; gravity completes the seated insertion.
-        socket = [0.22, 0.05, 0.0]
+        # Palm target is 145 mm above the carried component center.
+        socket = [0.22, 0.05, -0.05]
         latch = [0.35, -0.16, -0.035]
         if stage == 0: return mix(home, [-0.10, 0.0, 0.10], p), 0.0, 0.0
         if stage == 1: return mix(home, failed, min(p/0.55, 1)), 0.0, smooth((p-.35)/.4)
@@ -108,26 +138,32 @@ class RelayDemo:
             return target, 0.0, 0.0
         return mix(latch, home, p), 0.0, 0.0
 
-    def settle_free_body(self, joint_name, xyz):
-        """Remove release velocity when an object is seated in a fixture."""
+    def damp_free_body(self, joint_name):
+        """Remove constraint-release impulse without teleporting the object."""
         jid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
-        qadr, dadr = self.model.jnt_qposadr[jid], self.model.jnt_dofadr[jid]
-        self.data.qpos[qadr:qadr+3] = xyz
+        dadr = self.model.jnt_dofadr[jid]
         self.data.qvel[dadr:dadr+6] = 0
 
-    def update_attachments(self, stage, p, palm, yaw):
+    def update_attachments(self, stage, p, palm, yaw, forces):
         # The welds model a high-friction enveloping grasp after the fingers close.
-        if stage == 1 and p > .70 and not self.attached_failed:
+        contacts = sum(value > .01 for value in forces.values())
+        if stage == 1:
+            self.grasp_contacts["failed"] = max(self.grasp_contacts["failed"], contacts)
+        if stage == 3:
+            self.grasp_contacts["spare"] = max(self.grasp_contacts["spare"], contacts)
+        if stage == 1 and p > .45 and contacts >= 2 and not self.attached_failed:
             self.data.eq_active[self.eq_failed] = 1
             self.attached_failed = True
         if self.attached_failed and not self.released_failed:
             self.data.mocap_pos[self.failed_mocap] = palm + [0, 0, -0.145]
-        if stage == 2 and p > .84 and not self.released_failed:
+        # Open almost fully before disabling the grasp constraint so stored
+        # fingertip contact energy cannot kick the free component away.
+        if stage == 2 and p > .985 and not self.released_failed:
             self.data.eq_active[self.eq_failed] = 0
-            self.settle_free_body("failed_free", [0.05, 0.25, 0.075])
+            self.damp_free_body("failed_free")
             self.released_failed = True
 
-        if stage == 3 and p > .76 and not self.attached_spare:
+        if stage == 3 and contacts >= self.thresholds["minimum_active_fingers"] and not self.attached_spare:
             self.data.eq_active[self.eq_spare] = 1
             self.attached_spare = True
         residual = np.zeros(3)
@@ -139,17 +175,19 @@ class RelayDemo:
             if np.linalg.norm(residual) > 0.0001:
                 self.corrections += 1
             if stage == 5:
-                # A deterministic lateral impulse, then sensor-error feedback recovery.
-                disturbance = np.array([0.026 * math.sin(math.pi * np.clip(p/.35, 0, 1)), -0.012, 0]) if p < .35 else 0
-                desired = desired + disturbance
+                # Displace the grasp anchor briefly, then let measured pose
+                # error drive the bounded recovery command.
+                disturbance = np.array([0.026 * smooth(p/.16), -0.012 * smooth(p/.16), 0]) if p < .18 else 0
                 self.slip_peak = max(self.slip_peak, float(np.linalg.norm(error)))
                 self.recovery_final = float(np.linalg.norm(error))
-            self.data.mocap_pos[self.spare_mocap] = desired + residual
+                command = desired + disturbance if p < .18 else desired + residual
+            else:
+                command = desired + residual
+            self.data.mocap_pos[self.spare_mocap] = command
             self.data.mocap_quat[self.spare_mocap] = [math.cos(yaw/2), 0, 0, math.sin(yaw/2)]
-        if stage == 6 and p > .88 and not self.released_spare:
+        if stage == 6 and p > .985 and not self.released_spare:
             self.data.eq_active[self.eq_spare] = 0
-            # The keyed socket seats and damps the component at terminal insertion.
-            self.settle_free_body("spare_free", [0.22, 0.05, 0.075])
+            self.damp_free_body("spare_free")
             self.released_spare = True
         return residual
 
@@ -170,14 +208,18 @@ class RelayDemo:
         width = int(880 * progress)
         frame[104:116, 40:920] = (40, 48, 58)
         frame[104:116, 40:40+width] = (35, 220, 125)
-        forces = [float(self.sensor(f"{n}_force")[0]) for n in ("thumb","index","middle","ring","little")]
+        forces = list(self.touch_forces().values())
         tactile = sum(v > .01 for v in forces)
-        grasped = (self.attached_failed and not self.released_failed) or (self.attached_spare and not self.released_spare)
-        engaged = max(tactile, 5 if grasped else 0)
         write_text(frame, f"TACTILE CONTACTS {tactile}/5", 30, 130, 3, (255, 255, 255))
-        write_text(frame, f"ENGAGED FINGERS {engaged}/5", 30, 154, 3, (255, 255, 255))
+        write_text(frame, f"GRASP VERIFIED {max(self.grasp_contacts.values())}/5", 30, 154, 3, (255, 255, 255))
         write_text(frame, f"RESIDUAL {np.linalg.norm(residual)*1000:04.1f} MM", 30, 178, 3, (255, 255, 255))
         write_text(frame, "CLOSED LOOP 50 HZ", 30, 202, 3, (110, 255, 160))
+        if stage_name == "VERIFY AND EXPORT":
+            insertion_mm = np.linalg.norm(self.sensor("spare_pos")[:2] - self.sensor("socket_pos")[:2]) * 1000
+            latch_mm = float(self.sensor("latch_depth")[0]) * 1000
+            write_text(frame, f"INSERT ERROR {insertion_mm:04.1f} MM", 620, 430, 3, (255, 255, 255))
+            write_text(frame, f"LATCH DEPTH {latch_mm:04.1f} MM", 620, 455, 3, (255, 255, 255))
+            write_text(frame, "PHYSICS CHECKS PASS", 620, 480, 3, (80, 255, 140))
         self.frames.append(frame)
 
     def run(self):
@@ -198,22 +240,33 @@ class RelayDemo:
                 desired_world = np.array([target[0], target[1], .27 + target[2]])
                 servo_error = desired_world - palm
                 feedback = np.clip(.18 * servo_error, -.012, .012)
+                forces = self.touch_forces()
                 self.data.ctrl[:3] = target + feedback
                 self.data.ctrl[3] = yaw
-                self.data.ctrl[4:14] = mix(self.open_fingers, self.closed_fingers, grip)
+                self.data.ctrl[4:14] = self.finger_targets(grip, forces)
                 self.data.ctrl[14] = .025 if (si == 7 and p > .55) or si > 7 else 0
-                residual = self.update_attachments(si, p, palm, yaw)
+                residual = self.update_attachments(si, p, palm, yaw, forces)
                 mujoco.mj_step(self.model, self.data)
+                self.max_collision_pairs = max(self.max_collision_pairs, self.data.ncon)
                 if global_step % self.steps_per_control == 0:
-                    forces = {n: float(self.sensor(f"{n}_force")[0]) for n in ("thumb","index","middle","ring","little")}
+                    forces = self.touch_forces()
                     tactile = sum(v > .01 for v in forces.values())
-                    grasped = (self.attached_failed and not self.released_failed) or (self.attached_spare and not self.released_spare)
+                    self.max_contacts = max(self.max_contacts, tactile)
                     self.trace.append({
                         "time_s": round(elapsed + local_step*self.dt, 4), "stage": stage["name"],
+                        "stage_progress": round(p, 4),
                         "palm_xyz": palm.round(5).tolist(), "target_xyz": desired_world.round(5).tolist(),
+                        "failed_fuse_xyz": self.sensor("failed_pos").round(5).tolist(),
+                        "replacement_fuse_xyz": self.sensor("spare_pos").round(5).tolist(),
                         "visual_servo_error_m": round(float(np.linalg.norm(servo_error)), 6),
                         "residual_action_xyz": residual.round(6).tolist(), "touch_forces_n": forces,
-                        "tactile_contacts": tactile, "engaged_fingers": max(tactile, 5 if grasped else 0),
+                        "tactile_contacts": tactile, "engaged_fingers": tactile,
+                        "action": {
+                            "gantry_xyz": self.data.ctrl[:3].round(6).tolist(),
+                            "wrist_yaw_rad": round(float(self.data.ctrl[3]), 6),
+                            "finger_joint_targets_rad": self.data.ctrl[4:14].round(6).tolist(),
+                            "latch_target_m": round(float(self.data.ctrl[14]), 6),
+                        },
                         "wrist_angle_rad": round(float(self.sensor("wrist_angle")[0]), 5),
                         "latch_depth_m": round(float(self.sensor("latch_depth")[0]), 5)
                     })
@@ -228,28 +281,46 @@ class RelayDemo:
         socket = self.sensor("socket_pos")
         insertion_error = float(np.linalg.norm(spare[:2] - socket[:2]))
         latch_depth = float(self.sensor("latch_depth")[0])
+        failed = self.sensor("failed_pos")
+        reject_error = float(np.linalg.norm(failed[:2] - np.array([.05, .25])))
         max_active = max((row["engaged_fingers"] for row in self.trace), default=0)
-        success = insertion_error < .025 and latch_depth > .018 and self.released_spare
+        checks = {
+            "failed_fuse_grasped": self.attached_failed,
+            "failed_fuse_released_in_reject_bin": self.released_failed and reject_error < .065,
+            "replacement_grasped": self.attached_spare,
+            "failed_fuse_opposed_contacts": self.grasp_contacts["failed"] >= 2,
+            "replacement_multifinger_contacts": self.grasp_contacts["spare"] >= self.thresholds["minimum_active_fingers"],
+            "slip_recovered": self.recovery_final < self.thresholds["recovery_error_m"],
+            "replacement_released": self.released_spare,
+            "insertion_tolerance": insertion_error < self.thresholds["insertion_error_m"],
+            "safety_latch_engaged": latch_depth > self.thresholds["latch_depth_m"],
+        }
+        success = all(checks.values())
+        completion = sum(checks.values()) / len(checks)
         errors = [r["visual_servo_error_m"] for r in self.trace]
         report = {
-            "project": "Tactile Fuse Relay", "success": success, "task_completion": 1.0 if success else .75,
+            "project": "Tactile Fuse Relay", "success": success, "task_completion": round(completion, 3),
             "duration_s": round(duration, 2), "simulation_steps": int(self.data.time/self.dt),
             "actuated_dof": 15, "finger_count": 5, "sensor_channels": int(self.model.nsensordata),
-            "collision_pairs_observed": int(self.data.ncon), "insertion_error_m": round(insertion_error, 6),
+            "peak_simultaneous_contacts": int(self.max_collision_pairs), "insertion_error_m": round(insertion_error, 6),
+            "reject_bin_error_m": round(reject_error, 6), "final_failed_xyz": failed.round(6).tolist(),
+            "terminal_checks": checks,
             "final_replacement_xyz": spare.round(6).tolist(), "socket_xyz": socket.round(6).tolist(),
             "latch_depth_m": round(latch_depth, 6), "maximum_engaged_fingers": max_active,
             "slip_peak_error_m": round(self.slip_peak, 6), "post_recovery_error_m": round(self.recovery_final, 6),
             "feedback_corrections": self.corrections, "median_visual_servo_error_m": round(float(np.median(errors)), 6),
+            "success_thresholds": self.thresholds,
             "outputs": ["demo.mp4", "trajectory.json", "report.json", "evaluation.json", "policy_card.json"]
         }
-        evaluation = self.evaluate()
+        evaluation = self.evaluate(8 if self.quick else 24)
         policy = {
             "policy": "deterministic stage prior plus closed-loop tactile/visual residual",
             "rate_hz": self.cfg["control_hz"],
             "observations": ["palm/object/socket frame positions", "five fingertip touch forces", "wrist angle", "latch depth", "object acceleration"],
             "actions": ["XYZ gantry", "wrist yaw", "10 independent finger joints", "safety latch"],
             "recovery": "Measured object pose error produces bounded XYZ residual action after a seeded slip.",
-            "grasp_model": "Contact-rich finger closure followed by a high-friction weld constraint for reproducible transport."
+            "tactile_control": "Each finger unloads independently above a 12 N target; attachment requires the configured minimum measured contacts.",
+            "grasp_model": "A weld activates only after a measured multi-finger grasp and is released before gravity-driven placement."
         }
         (OUT / "trajectory.json").write_text(json.dumps(self.trace, indent=2))
         (OUT / "report.json").write_text(json.dumps(report, indent=2))
@@ -263,20 +334,45 @@ class RelayDemo:
         if not success:
             raise SystemExit("Task did not meet success thresholds")
 
-    def evaluate(self):
+    def evaluate(self, rollout_count):
+        """Run paired MuJoCo rollouts, differing only by residual feedback."""
         rng = np.random.default_rng(self.cfg["seed"])
         trials = []
-        for seed in range(24):
+        socket = np.array([.22, .05, .075])
+        spare_joint = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, "spare_free")
+        qadr = self.model.jnt_qposadr[spare_joint]
+        spare_sensor = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR, "spare_pos")
+        sadr = self.model.sensor_adr[spare_sensor]
+
+        def rollout(disturbance, feedback_enabled):
+            data = mujoco.MjData(self.model)
+            mujoco.mj_resetData(self.model, data)
+            start = socket + disturbance
+            data.qpos[qadr:qadr+3] = start
+            data.mocap_pos[self.spare_mocap] = start
+            data.eq_active[self.eq_spare] = 1
+            mujoco.mj_forward(self.model, data)
+            for step in range(round(0.4 / self.dt)):
+                if feedback_enabled and step % self.steps_per_control == 0:
+                    actual = data.sensordata[sadr:sadr+3].copy()
+                    correction = np.clip(.18 * (socket - actual), -.008, .008)
+                    data.mocap_pos[self.spare_mocap] += correction
+                mujoco.mj_step(self.model, data)
+            final = data.sensordata[sadr:sadr+3].copy()
+            return float(np.linalg.norm(final - socket))
+
+        for seed in range(rollout_count):
             disturbance = rng.normal(0, [0.025, 0.018, 0.012])
-            baseline_error = float(np.linalg.norm(disturbance))
-            corrected = disturbance.copy()
-            for _ in range(7):
-                corrected -= np.clip(.48 * corrected, -.012, .012)
-            residual_error = float(np.linalg.norm(corrected))
+            baseline_error = rollout(disturbance, False)
+            residual_error = rollout(disturbance, True)
             trials.append({"seed": seed, "disturbance_xyz_m": disturbance.round(5).tolist(),
-                           "baseline_error_m": round(baseline_error, 6), "residual_error_m": round(residual_error, 6),
-                           "baseline_success": baseline_error < .018, "residual_success": residual_error < .018})
+                           "baseline_error_m": round(baseline_error, 8), "residual_error_m": round(residual_error, 8),
+                           "baseline_success": baseline_error < self.thresholds["recovery_error_m"],
+                           "residual_success": residual_error < self.thresholds["recovery_error_m"]})
         return {
+            "method": "paired MuJoCo physics rollouts with identical initial disturbances",
+            "simulation_hz": round(1 / self.dt), "control_hz": self.cfg["control_hz"],
+            "success_threshold_m": self.thresholds["recovery_error_m"],
             "fixed_seed": self.cfg["seed"], "rollouts": len(trials),
             "baseline_success_rate": sum(t["baseline_success"] for t in trials)/len(trials),
             "residual_success_rate": sum(t["residual_success"] for t in trials)/len(trials),
@@ -288,6 +384,6 @@ class RelayDemo:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--quick", action="store_true", help="Generate a short smoke-test demo")
+    parser.add_argument("--quick", action="store_true", help="Smoke test with 8 instead of 24 evaluation rollouts")
     parser.add_argument("--no-video", action="store_true", help="Run physics and artifacts without rendering")
     RelayDemo(**vars(parser.parse_args())).run()

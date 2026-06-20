@@ -7,11 +7,28 @@
   "actuated_dof": 15,
   "finger_count": 5,
   "sensor_channels": 23,
-  "collision_pairs_observed": 8,
-  "insertion_error_m": 0.007527,
+  "peak_simultaneous_contacts": 28,
+  "insertion_error_m": 5.3e-05,
+  "reject_bin_error_m": 0.02729,
+  "final_failed_xyz": [
+    0.035428,
+    0.226926,
+    0.082984
+  ],
+  "terminal_checks": {
+    "failed_fuse_grasped": true,
+    "failed_fuse_released_in_reject_bin": true,
+    "replacement_grasped": true,
+    "failed_fuse_opposed_contacts": true,
+    "replacement_multifinger_contacts": true,
+    "slip_recovered": true,
+    "replacement_released": true,
+    "insertion_tolerance": true,
+    "safety_latch_engaged": true
+  },
   "final_replacement_xyz": [
-    0.218087,
-    0.04272,
+    0.220045,
+    0.049972,
     0.071984
   ],
   "socket_xyz": [
@@ -19,12 +36,18 @@
     0.05,
     0.075
   ],
-  "latch_depth_m": 0.025354,
+  "latch_depth_m": 0.021539,
   "maximum_engaged_fingers": 5,
-  "slip_peak_error_m": 0.016844,
-  "post_recovery_error_m": 4.1e-05,
-  "feedback_corrections": 4464,
-  "median_visual_servo_error_m": 0.022212,
+  "slip_peak_error_m": 0.033619,
+  "post_recovery_error_m": 0.004738,
+  "feedback_corrections": 6686,
+  "median_visual_servo_error_m": 0.08297,
+  "success_thresholds": {
+    "insertion_error_m": 0.025,
+    "latch_depth_m": 0.018,
+    "recovery_error_m": 0.018,
+    "minimum_active_fingers": 3
+  },
   "outputs": [
     "demo.mp4",
     "trajectory.json",
