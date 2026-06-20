@@ -86,9 +86,9 @@
       "max": 10,
       "evidence": "Combines tactile dexterity, actuator-only disturbance recovery, conditional safety interlocking, paired ablation, and dataset export in one benchmark"
     },
-    "total_score": 75,
-    "max_score": 80,
-    "percentage": 93.75
+    "total_score": 95,
+    "max_score": 100,
+    "percentage": 95.0  
   },
   "measured_results": {
     "insertion_error_mm": 10.161,
