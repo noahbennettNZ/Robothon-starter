@@ -1,0 +1,99 @@
+<mujoco model="thermasort_battery_triage">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.005" gravity="0 0 -9.81" integrator="RK4">
+    <flag contact="enable"/>
+  </option>
+  <size nuser_body="1"/>
+
+  <visual>
+    <global azimuth="135" elevation="-25" offwidth="1280" offheight="720"/>
+    <quality shadowsize="2048"/>
+  </visual>
+
+  <default>
+    <joint damping="8" armature="0.05"/>
+    <geom condim="4" friction="0.8 0.02 0.002" solref="0.01 1" solimp="0.9 0.95 0.001"/>
+    <position kp="500" kv="55" forcerange="-160 160"/>
+  </default>
+
+  <asset>
+    <texture name="floor_tex" type="2d" builtin="checker" rgb1="0.12 0.14 0.16" rgb2="0.18 0.2 0.22" width="512" height="512"/>
+    <material name="floor_mat" texture="floor_tex" texrepeat="4 4" reflectance="0.05"/>
+    <material name="steel" rgba="0.32 0.36 0.4 1" metallic="0.7" roughness="0.3"/>
+    <material name="safe_cell" rgba="0.18 0.55 0.3 1" metallic="0.25" roughness="0.35"/>
+    <material name="hot_cell" rgba="0.9 0.18 0.08 1" metallic="0.25" roughness="0.35"/>
+    <material name="tool" rgba="0.08 0.55 0.85 1" metallic="0.4" roughness="0.25"/>
+    <material name="quarantine" rgba="0.95 0.65 0.08 0.7"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" diffuse="0.9 0.9 0.9"/>
+    <light pos="-0.8 -0.6 0.8" dir="0.7 0.5 -0.6" diffuse="0.5 0.55 0.65"/>
+    <geom name="floor" type="plane" size="2 2 0.1" material="floor_mat"/>
+    <geom name="workbench" type="box" pos="0 0 0.06" size="0.52 0.42 0.06" rgba="0.22 0.24 0.27 1"/>
+
+    <geom name="rail_x" type="box" pos="0 0 0.73" size="0.49 0.025 0.025" material="steel" contype="0" conaffinity="0"/>
+    <geom name="rail_y" type="box" pos="0 0 0.69" size="0.025 0.40 0.018" material="steel" contype="0" conaffinity="0"/>
+
+    <body name="gantry_x" pos="0 0 0.72">
+      <joint name="gantry_x_joint" type="slide" axis="1 0 0" range="-0.38 0.38"/>
+      <geom type="box" size="0.05 0.045 0.035" material="steel" contype="0" conaffinity="0"/>
+      <body name="gantry_y">
+        <joint name="gantry_y_joint" type="slide" axis="0 1 0" range="-0.30 0.30"/>
+        <geom type="box" size="0.04 0.06 0.03" material="steel" contype="0" conaffinity="0"/>
+        <body name="tool">
+          <joint name="gantry_z_joint" type="slide" axis="0 0 -1" range="0 0.50"/>
+          <geom name="tool_shaft" type="cylinder" pos="0 0 -0.045" size="0.018 0.06" material="steel" contype="0" conaffinity="0"/>
+          <geom name="magnet_pad" type="cylinder" pos="0 0 -0.11" size="0.048 0.009" material="tool" mass="0.08"/>
+          <site name="tool_contact_site" type="cylinder" pos="0 0 -0.12" size="0.047 0.012" rgba="0 0 0 0"/>
+          <site name="tool_frame" type="sphere" size="0.008" rgba="0.2 0.8 1 1"/>
+        </body>
+      </body>
+    </body>
+
+    <body name="cell_0" pos="-0.27 -0.12 0.175" user="38.5">
+      <freejoint/>
+      <geom type="box" size="0.045 0.06 0.055" material="safe_cell" mass="0.48"/>
+      <site name="cell_0_top" pos="0 0 0.058" size="0.006" rgba="0 1 0 1"/>
+    </body>
+    <body name="cell_1" pos="-0.09 -0.12 0.175" user="42.0">
+      <freejoint/>
+      <geom type="box" size="0.045 0.06 0.055" material="safe_cell" mass="0.48"/>
+      <site name="cell_1_top" pos="0 0 0.058" size="0.006" rgba="0 1 0 1"/>
+    </body>
+    <body name="cell_2" pos="0.09 -0.12 0.175" user="72.4">
+      <freejoint/>
+      <geom type="box" size="0.045 0.06 0.055" material="hot_cell" mass="0.48"/>
+      <site name="cell_2_top" pos="0 0 0.058" size="0.006" rgba="1 0.1 0 1"/>
+    </body>
+    <body name="cell_3" pos="0.27 -0.12 0.175" user="40.2">
+      <freejoint/>
+      <geom type="box" size="0.045 0.06 0.055" material="safe_cell" mass="0.48"/>
+      <site name="cell_3_top" pos="0 0 0.058" size="0.006" rgba="0 1 0 1"/>
+    </body>
+
+    <geom name="quarantine_base" type="box" pos="0.28 0.22 0.135" size="0.09 0.09 0.015" material="quarantine"/>
+    <geom name="quarantine_left" type="box" pos="0.18 0.22 0.19" size="0.01 0.10 0.07" material="quarantine"/>
+    <geom name="quarantine_right" type="box" pos="0.38 0.22 0.19" size="0.01 0.10 0.07" material="quarantine"/>
+    <geom name="quarantine_back" type="box" pos="0.28 0.31 0.19" size="0.10 0.01 0.07" material="quarantine"/>
+    <site name="quarantine_target" pos="0.28 0.22 0.22" type="cylinder" size="0.06 0.002" rgba="1 0.8 0.1 0.4"/>
+  </worldbody>
+
+  <actuator>
+    <position name="x_servo" joint="gantry_x_joint" ctrlrange="-0.38 0.38"/>
+    <position name="y_servo" joint="gantry_y_joint" ctrlrange="-0.30 0.30"/>
+    <position name="z_servo" joint="gantry_z_joint" ctrlrange="0 0.50"/>
+  </actuator>
+
+  <sensor>
+    <jointpos name="x_position" joint="gantry_x_joint"/>
+    <jointpos name="y_position" joint="gantry_y_joint"/>
+    <jointpos name="z_position" joint="gantry_z_joint"/>
+    <jointvel name="x_velocity" joint="gantry_x_joint"/>
+    <jointvel name="y_velocity" joint="gantry_y_joint"/>
+    <jointvel name="z_velocity" joint="gantry_z_joint"/>
+    <touch name="tool_contact" site="tool_contact_site"/>
+    <framepos name="tool_position" objtype="body" objname="tool"/>
+    <accelerometer name="tool_acceleration" site="tool_frame"/>
+  </sensor>
+</mujoco>

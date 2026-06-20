@@ -1,0 +1,189 @@
+{
+  "project": "ThermaSort Battery Cell Triage",
+  "uuid": "559b2a48-eaa8-4831-8217-ae515f020daa",
+  "success": true,
+  "simulation_time_s": 47.755,
+  "control_frequency_hz": 200,
+  "thermal_readings_c": {
+    "cell_0": 38.5,
+    "cell_1": 42.0,
+    "cell_2": 72.4,
+    "cell_3": 40.2
+  },
+  "flagged_cell": "cell_2",
+  "pickup_touch_force_n": 0.87204,
+  "peak_touch_force_n": 0.98876,
+  "peak_magnetic_force_n": 7.60187,
+  "lift_height_m": 0.160811,
+  "quarantine_xy_error_m": 0.0,
+  "final_cell_xyz": [
+    0.28,
+    0.22,
+    0.20499
+  ],
+  "checks": {
+    "thermal_anomaly_identified": true,
+    "contact_verified_before_pickup": true,
+    "minimum_lift_achieved": true,
+    "cell_inside_quarantine": true,
+    "magnetic_force_within_limit": true
+  },
+  "events": [
+    {
+      "event": "approach_cell_0",
+      "time_s": 6.195,
+      "target": [
+        -0.27,
+        -0.12,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "scan_cell_0",
+      "time_s": 6.765,
+      "target": [
+        -0.27,
+        -0.12,
+        0.24
+      ],
+      "position_error_m": 0.001614
+    },
+    {
+      "event": "approach_cell_1",
+      "time_s": 11.725,
+      "target": [
+        -0.09,
+        -0.12,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "scan_cell_1",
+      "time_s": 12.295,
+      "target": [
+        -0.09,
+        -0.12,
+        0.24
+      ],
+      "position_error_m": 0.001614
+    },
+    {
+      "event": "approach_cell_2",
+      "time_s": 17.255,
+      "target": [
+        0.09,
+        -0.12,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "scan_cell_2",
+      "time_s": 17.825,
+      "target": [
+        0.09,
+        -0.12,
+        0.24
+      ],
+      "position_error_m": 0.001614
+    },
+    {
+      "event": "approach_cell_3",
+      "time_s": 22.785,
+      "target": [
+        0.27,
+        -0.12,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "scan_cell_3",
+      "time_s": 23.355,
+      "target": [
+        0.27,
+        -0.12,
+        0.24
+      ],
+      "position_error_m": 0.001614
+    },
+    {
+      "event": "classification",
+      "hottest_cell": "cell_2",
+      "temperature_c": 72.4,
+      "limit_c": 55.0,
+      "flagged": true
+    },
+    {
+      "event": "return_to_hot_cell",
+      "time_s": 28.315,
+      "target": [
+        0.09,
+        -0.12,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "contact_pickup",
+      "time_s": 29.05,
+      "target": [
+        0.09,
+        -0.12,
+        0.37
+      ],
+      "position_error_m": 0.001079
+    },
+    {
+      "event": "magnet_engaged",
+      "cell": "cell_2",
+      "touch_force_n": 0.87204
+    },
+    {
+      "event": "lift",
+      "time_s": 34.87,
+      "target": [
+        0.09,
+        -0.12,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "transport_to_quarantine",
+      "time_s": 40.34,
+      "target": [
+        0.28,
+        0.22,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    },
+    {
+      "event": "lower_into_tray",
+      "time_s": 41.055,
+      "target": [
+        0.28,
+        0.22,
+        0.335
+      ],
+      "position_error_m": 0.001551
+    },
+    {
+      "event": "magnet_released",
+      "cell": "cell_2"
+    },
+    {
+      "event": "retreat",
+      "time_s": 47.155,
+      "target": [
+        0.28,
+        0.22,
+        0.2
+      ],
+      "position_error_m": 0.003966
+    }
+  ]
+}

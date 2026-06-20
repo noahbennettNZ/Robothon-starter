@@ -1,0 +1,25 @@
+{
+  "project": "ThermaSort Battery Cell Triage",
+  "control_frequency_hz": 200,
+  "thermal_limit_c": 55.0,
+  "cell_names": ["cell_0", "cell_1", "cell_2", "cell_3"],
+  "quarantine_xy_m": [0.28, 0.22],
+  "motion": {
+    "scan_depth_m": 0.24,
+    "pickup_depth_m": 0.37,
+    "transport_depth_m": 0.20,
+    "position_tolerance_m": 0.003,
+    "max_steps": 900
+  },
+  "magnetic_gripper": {
+    "spring_n_per_m": 900.0,
+    "damping_ns_per_m": 28.0,
+    "max_force_n": 45.0,
+    "cell_offset_m": [0.0, 0.0, -0.175]
+  },
+  "success_thresholds": {
+    "quarantine_xy_error_m": 0.035,
+    "minimum_lift_m": 0.08,
+    "maximum_peak_force_n": 45.0
+  }
+}
