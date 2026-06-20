@@ -6,8 +6,8 @@ Registration UUID: 559b2a48-eaa8-4831-8217-ae515f020daa
 - **Platform:** Procedural 15-actuator MuJoCo five-finger gantry hand
 - **Goal:** Replace a failed high-voltage fuse and engage its safety latch despite a transport slip
 - **Approach:** Nine-stage planner plus 50 Hz pose residual and per-finger force feedback
-- **Highlights:** opposed five-finger grasp, physical containment/socket placement, spring-return interlock, seeded recovery, 24 paired MuJoCo rollouts, generated video and complete observation/action trajectory
-- **Limitation:** deterministic high-level plan and disclosed post-contact grasp constraint
+- **Highlights:** opposed force-limited five-finger grasp, keyed XY/depth/yaw insertion, physical containment, conditional spring-return interlock, actuator-only seeded recovery, 24 paired MuJoCo rollouts, generated video and complete observation/action trajectory
+- **Limitation:** deterministic high-level plan and disclosed palm-coupled high-static-friction grasp lock
 
 ## Run
 

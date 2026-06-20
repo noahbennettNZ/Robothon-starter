@@ -1,6 +1,6 @@
 # Tactile Fuse Relay
 
-Tactile Fuse Relay is a self-contained MuJoCo disaster-response task. A 15-actuator, five-finger hand isolates a failed high-voltage fuse, disposes of it, grasps a replacement, performs wrist reorientation, rejects a seeded slip with closed-loop feedback, inserts the fuse, and presses a safety latch. The run exports its complete sensor/action trajectory and a fixed-seed controller ablation.
+Tactile Fuse Relay is a self-contained MuJoCo disaster-response task. A 15-actuator, five-finger hand isolates a failed high-voltage fuse, disposes of it, grasps and reorients a keyed replacement, rejects a seeded grasp-frame slip through robot-space feedback, inserts the fuse to depth and yaw tolerances, and presses a conditional safety latch. The run exports its complete sensor/action trajectory and a fixed-seed controller ablation.
 
 ## Run
 
@@ -22,13 +22,13 @@ Use `--no-video` when only physics/controller validation is required. `--quick` 
 
 ## What the robot actually uses
 
-- **MuJoCo physics:** free fuse bodies, collision filtering, friction, gravity, 14 hand joints, an open containment tray, a spring-return latch, 15 position actuators, and equality constraints used as a reproducible high-friction grasp.
+- **MuJoCo physics:** keyed free fuse bodies, collision filtering, softened contact, friction, gravity, 14 hand joints, an open containment tray, a spring-return latch, 15 position actuators, 27 sensor channels, and palm-coupled constraints used as a reproducible high-static-friction grasp state. There are no mocap bodies.
 - **Sensors:** four frame-position streams, five independent fingertip touch sensors, latch touch/depth, wrist position, and replacement-fuse acceleration.
-- **Control:** a deterministic nine-stage task plan plus 50 Hz bounded residual control driven by measured palm/object error. Five independent force-limiting loops unload any finger above 12 N.
-- **Recovery:** a deterministic lateral slip is introduced during transport. The controller observes the resulting pose error and corrects the object target. Twenty-four paired MuJoCo rollouts compare feedback against open loop under identical disturbances.
+- **Control:** a deterministic nine-stage task plan plus 50 Hz bounded integral-residual control driven by measured palm/object error. Five independent tactile loops back-drive above 4 N, while all ten finger actuators have hard force limits.
+- **Recovery:** a deterministic lateral slip is introduced in the measured palm/object grasp frame. The controller can correct it only through XYZ robot actuators; object pose is never commanded directly. Twenty-four paired MuJoCo actuator rollouts compare feedback against open loop under identical disturbances.
 - **Data collection:** every 20 ms sample records task state, object and palm observations, complete 15-actuator action, target, visual-servo error, residual action, five touch forces, wrist angle, and latch depth.
 
-The grasp constraint is disclosed rather than hidden: it can activate only after measured opposed/multi-finger contact, models the high static friction of an enveloping grasp, and is disabled before gravity-driven placement. “Engaged fingers” is always the measured touch count; it is never synthesized from attachment state.
+The grasp constraint is disclosed rather than hidden: it couples the free object to the actuated palm—not to mocap—can activate only after measured opposed/multi-finger contact, captures the observed contact transform without snapping, and is disabled before gravity-driven placement. “Engaged fingers” is always the measured touch count; it is never synthesized from lock state.
 
 ## Task sequence
 
@@ -49,7 +49,7 @@ The grasp constraint is disclosed rather than hidden: it can activate only after
 | `artifacts/demo.mp4` | Robot, task stages, progress, active contacts and residual magnitude |
 | `artifacts/trajectory.json` | 50 Hz observations, actions, tactile forces, stages and errors |
 | `artifacts/report.json` | Success, final tolerances, model scale and controller metrics |
-| `artifacts/evaluation.json` | 24 paired, fixed-seed MuJoCo open-loop vs feedback trials |
+| `artifacts/evaluation.json` | 24 paired, fixed-seed robot-actuator open-loop vs feedback trials |
 | `artifacts/policy_card.json` | Exact policy observations, actions and recovery behavior |
 
 ## Rubric map
@@ -57,16 +57,16 @@ The grasp constraint is disclosed rather than hidden: it can activate only after
 | Criterion | Direct evidence |
 |---|---|
 | Runnability | One command, no downloads or learned weights, quick/headless modes, validator |
-| MuJoCo depth | Articulated MJCF, free bodies, contacts, 15 actuators, 13 named sensors, constraints |
+| MuJoCo depth | Articulated MJCF, free bodies, keyed geometry, contacts, 15 actuators, 14 named sensors / 27 channels, palm-coupled constraints |
 | Task design | Clear safety-critical, nine-stage repair with measurable terminal conditions |
-| Control | Task planner, visual servo, tactile state, bounded residual actions, seeded ablation |
-| Dexterity | Opposed radial five-finger hand, ten independently actuated joints, measured grasp contact and wrist reorientation |
+| Control | Task planner, component tracking, tactile state, bounded 50 Hz robot residual actions, seeded actuator ablation |
+| Dexterity | Opposed radial five-finger hand, ten independently actuated and force-limited joints, measured grasp contact and keyed wrist reorientation |
 | Engineering | Config separated from model/controller, structured artifacts and deterministic seed |
 | Presentation | Generated 60-second video with readable live evidence overlays |
 | Innovation | A safety interlock repair benchmark combining dexterity, recovery and dataset export |
 
 ## Limitations and next steps
 
-The high-level planner is scripted for judging reproducibility, and post-contact transport uses a disclosed grasp constraint after contact validation. A learned policy could replace the residual law; randomized fuse geometries would make the benchmark harder.
+The high-level planner is scripted for judging reproducibility, and post-contact transport uses a disclosed palm-coupled high-friction lock after contact validation. A learned policy could replace the residual law; randomized fuse geometries and fully friction-only transport would make the benchmark harder.
 
 Before submitting, replace the placeholders in `registration.json` and put the identical UUID in your pull-request description.

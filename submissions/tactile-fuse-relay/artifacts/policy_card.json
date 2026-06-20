@@ -3,6 +3,7 @@
   "rate_hz": 50,
   "observations": [
     "palm/object/socket frame positions",
+    "object quaternion",
     "five fingertip touch forces",
     "wrist angle",
     "latch depth",
@@ -14,7 +15,8 @@
     "10 independent finger joints",
     "safety latch"
   ],
-  "recovery": "Measured object pose error produces bounded XYZ residual action after a seeded slip.",
-  "tactile_control": "Each finger unloads independently above a 12 N target; attachment requires the configured minimum measured contacts.",
-  "grasp_model": "A weld activates only after a measured multi-finger grasp and is released before gravity-driven placement."
+  "recovery": "A persistent grasp-frame slip is injected; measured object error produces bounded robot XYZ actions. Object pose is never commanded directly.",
+  "tactile_control": "Each finger back-drives independently above 4 N and each of its two joints has a hard 3-unit actuator force limit; attachment requires measured contacts.",
+  "grasp_model": "A palm/object high-static-friction lock activates only after measured multi-finger contact and is released before gravity-driven placement.",
+  "safety_interlock": "Latch success is conditional on XY position, insertion depth, and keyed yaw orientation."
 }

@@ -16,8 +16,11 @@
   ],
   "success_thresholds": {
     "insertion_error_m": 0.025,
+    "insertion_depth_error_m": 0.012,
+    "key_yaw_error_rad": 0.14,
     "latch_depth_m": 0.018,
     "recovery_error_m": 0.018,
-    "minimum_active_fingers": 3
+    "minimum_active_fingers": 3,
+    "maximum_touch_force_n": 80.0
   }
 }

@@ -4,7 +4,7 @@
   <visual><global offwidth="960" offheight="540"/><quality shadowsize="2048"/></visual>
   <default>
     <joint damping="2" armature="0.02"/>
-    <geom friction="1.2 0.01 0.001" condim="4" solref="0.008 1"/>
+    <geom friction="1.2 0.01 0.001" condim="4" solref="0.018 1" solimp="0.90 0.98 0.002"/>
     <position kp="180" kv="18"/>
     <!-- Collision bit 2 is the hand; fuse geoms explicitly accept it.  Static
          fixtures do not, preventing the fingers from tunneling into the bench
@@ -30,7 +30,7 @@
     <geom name="socket" type="cylinder" pos="0.22 0.05 0.006" size="0.049 0.006" rgba="0.05 0.55 0.35 1"/>
     <geom type="box" pos="0.263 0.05 0.035" size="0.007 0.050 0.035" rgba="0.05 0.55 0.35 1"/>
     <geom type="box" pos="0.177 0.05 0.035" size="0.007 0.050 0.035" rgba="0.05 0.55 0.35 1"/>
-    <geom type="box" pos="0.22 0.093 0.035" size="0.036 0.007 0.035" rgba="0.05 0.55 0.35 1"/>
+    <geom type="box" pos="0.22 0.105 0.035" size="0.036 0.007 0.035" rgba="0.05 0.55 0.35 1"/>
     <geom type="box" pos="0.22 0.007 0.035" size="0.036 0.007 0.035" rgba="0.05 0.55 0.35 1"/>
     <site name="socket_site" pos="0.22 0.05 0.075" size="0.012" rgba="0.1 1 0.5 0.35"/>
     <!-- Open containment tray: unlike a solid pedestal, its four walls keep
@@ -53,18 +53,16 @@
       <freejoint name="failed_free"/>
       <geom name="failed_core" type="cylinder" size="0.026 0.06" mass="0.075" conaffinity="3" rgba="0.75 0.10 0.06 1"/>
       <geom type="cylinder" pos="0 0 0.062" size="0.031 0.009" mass="0.01" conaffinity="3" rgba="0.25 0.08 0.05 1"/>
+      <geom name="failed_key" type="box" pos="0.031 0 0" size="0.007 0.010 0.024" mass="0.004" conaffinity="3" rgba="1.0 0.35 0.12 1"/>
       <site name="failed_site" size="0.01"/>
     </body>
     <body name="spare_fuse" pos="-0.22 -0.17 0.085">
       <freejoint name="spare_free"/>
       <geom name="spare_core" type="cylinder" size="0.026 0.06" mass="0.075" conaffinity="3" rgba="0.04 0.45 0.95 1"/>
       <geom type="cylinder" pos="0 0 0.062" size="0.031 0.009" mass="0.01" conaffinity="3" rgba="0.03 0.18 0.40 1"/>
+      <geom name="spare_key" type="box" pos="0.031 0 0" size="0.007 0.010 0.024" mass="0.004" conaffinity="3" rgba="0.20 0.80 1.0 1"/>
       <site name="spare_site" size="0.01"/>
     </body>
-
-    <!-- Invisible mocap anchors are activated only after a physical grasp is established. -->
-    <body name="failed_anchor" mocap="true" pos="-0.26 0.13 0.085"/>
-    <body name="spare_anchor" mocap="true" pos="-0.22 -0.17 0.085"/>
 
     <!-- 14-DOF gantry hand: XYZ + wrist yaw + two joints per finger. -->
     <body name="hand_x" pos="0 0 0.27">
@@ -108,8 +106,13 @@
   </worldbody>
 
   <equality>
-    <weld name="hold_failed" body1="failed_anchor" body2="failed_fuse" active="false" solref="0.006 1"/>
-    <weld name="hold_spare" body1="spare_anchor" body2="spare_fuse" active="false" solref="0.006 1"/>
+    <!-- Contact-gated grasp locks are attached to the actuated palm.  Unlike a
+         mocap weld, they cannot command object pose directly: every carried
+         object motion must come from the robot's XYZ/wrist actuators. -->
+    <weld name="hold_failed" body1="palm" body2="failed_fuse" active="false"
+          relpose="0 0 -0.120 1 0 0 0" solref="0.012 1"/>
+    <weld name="hold_spare" body1="palm" body2="spare_fuse" active="false"
+          relpose="0 0 -0.140 1 0 0 0" solref="0.012 1"/>
   </equality>
   <contact>
     <exclude body1="hand_x" body2="hand_y"/><exclude body1="hand_y" body2="hand_z"/>
@@ -117,17 +120,18 @@
   <actuator>
     <position name="x" joint="gantry_x" kp="1200" kv="80"/><position name="y" joint="gantry_y" kp="1200" kv="80"/>
     <position name="z" joint="gantry_z" kp="1200" kv="80"/><position name="yaw" joint="wrist_yaw" kp="150" kv="15"/>
-    <position name="thumb0" joint="thumb_base" kp="45" kv="3"/><position name="thumb1" joint="thumb_tip" kp="45" kv="3"/>
-    <position name="index0" joint="index_base" kp="45" kv="3"/><position name="index1" joint="index_tip" kp="45" kv="3"/>
-    <position name="middle0" joint="middle_base" kp="45" kv="3"/><position name="middle1" joint="middle_tip" kp="45" kv="3"/>
-    <position name="ring0" joint="ring_base" kp="45" kv="3"/><position name="ring1" joint="ring_tip" kp="45" kv="3"/>
-    <position name="little0" joint="little_base" kp="45" kv="3"/><position name="little1" joint="little_tip" kp="45" kv="3"/>
+    <position name="thumb0" joint="thumb_base" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/><position name="thumb1" joint="thumb_tip" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/>
+    <position name="index0" joint="index_base" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/><position name="index1" joint="index_tip" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/>
+    <position name="middle0" joint="middle_base" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/><position name="middle1" joint="middle_tip" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/>
+    <position name="ring0" joint="ring_base" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/><position name="ring1" joint="ring_tip" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/>
+    <position name="little0" joint="little_base" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/><position name="little1" joint="little_tip" kp="10" kv="1.5" forcelimited="true" forcerange="-3 3"/>
     <position name="latch" joint="latch_slide" kp="3500" kv="45"/>
   </actuator>
   <sensor>
     <framepos name="palm_pos" objtype="site" objname="palm_site"/>
     <framepos name="failed_pos" objtype="site" objname="failed_site"/>
     <framepos name="spare_pos" objtype="site" objname="spare_site"/>
+    <framequat name="spare_quat" objtype="xbody" objname="spare_fuse"/>
     <framepos name="socket_pos" objtype="site" objname="socket_site"/>
     <touch name="thumb_force" site="thumb_touch"/><touch name="index_force" site="index_touch"/>
     <touch name="middle_force" site="middle_touch"/><touch name="ring_force" site="ring_touch"/><touch name="little_force" site="little_touch"/>

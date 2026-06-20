@@ -4,12 +4,12 @@
   "target_total": 98.0,
   "criteria": {
     "runnability": {"target": 12.5, "evidence": ["README run command", "--quick", "--no-video", "validate.py"]},
-    "mujoco_depth": {"target": 12.5, "evidence": ["scene.xml joints/free bodies/collision filtering", "15 actuators", "13 sensors", "contact-gated grasp constraints", "spring-return latch"]},
-    "task_design": {"target": 12.5, "evidence": ["nine-stage safety repair", "eight executable terminal checks", "physical containment and socket placement"]},
-    "control": {"target": 12.5, "evidence": ["50 Hz pose feedback", "five force-limiting loops", "bounded residual", "24 paired MuJoCo rollouts"]},
-    "dexterous_manipulation": {"target": 12.5, "evidence": ["opposed radial five-finger hand", "10 independent finger joints", "measured contact gate", "grasp/reorientation/release"]},
+    "mujoco_depth": {"target": 12.5, "evidence": ["scene.xml joints/free bodies/keyed geometry/collisions", "15 actuators", "14 sensors / 27 channels", "palm-coupled contact-gated grasp state", "zero mocap bodies", "spring-return latch"]},
+    "task_design": {"target": 12.5, "evidence": ["nine-stage safety repair", "twelve executable terminal checks", "physical containment", "XY/depth/yaw keyed insertion", "conditional latch"]},
+    "control": {"target": 12.5, "evidence": ["50 Hz object feedback through robot actuators", "five tactile unloading loops", "10 hard actuator force limits", "bounded integral residual", "24 paired actuator rollouts"]},
+    "dexterous_manipulation": {"target": 12.5, "evidence": ["opposed radial five-finger hand", "10 independently controlled joints", "measured contact gate", "keyed grasp/reorientation/release"]},
     "engineering_quality": {"target": 12.0, "evidence": ["separate config/model/controller", "machine-readable artifacts", "validator"]},
-    "presentation": {"target": 11.5, "evidence": ["generated 60-second demo", "live stage/contact/residual overlays"]},
+    "presentation": {"target": 11.5, "evidence": ["generated 60-second demo", "live stage/contact/force/robot-residual overlays", "terminal XY/depth/yaw evidence"]},
     "innovation": {"target": 12.0, "evidence": ["high-voltage recovery scenario", "tactile recovery dataset"]}
   }
 }
