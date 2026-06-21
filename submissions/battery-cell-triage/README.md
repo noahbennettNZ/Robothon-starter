@@ -2,7 +2,7 @@
 
 **FFAI Robothon 2026 — Freestyle Category**
 
-Registration UUID: `559b2a48-eaa8-4831-8217-ae515f020daa`
+Registration UUID: `f0aa00b3-8361-4e1f-b0ac-8f6bd01cd00a`
 
 ThermaSort is an autonomous MuJoCo workcell that inspects four EV battery cells,
 identifies a thermal outlier, verifies tool contact, and relocates the unsafe cell
