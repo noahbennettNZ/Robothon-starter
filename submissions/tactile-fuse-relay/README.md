@@ -175,7 +175,7 @@ Runtime task measurements and all 12 terminal conditions are recorded separately
 
 ---
 
-## 🏆 Why This Project Stands Out
+## 🏆 Why this submission scored 98.78?
 
 1. **Safety-Critical Long-Horizon Task**: Extraction, containment, replacement, insertion, and interlock activation form one complete repair sequence
 2. **Measured Dexterity**: Five-finger contact and force signals drive grasp validation and overload response
